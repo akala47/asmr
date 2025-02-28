@@ -1,27 +1,46 @@
 #lang racket
 
 (require syntax-spec-v3
-         (for-syntax syntax/parse))
+         (for-syntax syntax/parse racket/list))
+
+
+(binding-class label #:reference-compiler mutable-reference-compiler)
 
 (syntax-spec
- (binding-class register-spec)
+  (host-interface/expression
+    (asm-block registers:registers-spec [inst:instruction-spec ...])
+    #:binding (scope registers (import inst) ...)
+    #'(compile-asm-instructions registers inst ...)) ;; Compile to Racket using bound variables
+  
+  (nonterminal registers-spec
+    (registers ([(quote reg-name) (quote initial-value)] ...)))
 
- (host-interface/expression
-    (registers r:register-spec)
-    #:binding r
-    #'(compile-registers r))
+  (nonterminal print-spec
+    #'(print-registers registers))
 
-  (nonterminal set-registers
-    [name:id init:racket-expr]))
+  (nonterminal/exporting instruction-spec
+    (label lbl:label)
+    #:binding (export lbl) ;; Note: We want to export the label from our nonterminal to machine host interface 
+    (cmp (quote reg1) (quote reg2)) ;; Instruction syntax not yet implemented
+    (jne lbl:label)
+    (mov (quote reg) val:number)
+    (jmp lbl:label)))
 
-(define-syntax compile-registers
+(define-syntax compile-asm-instructions
   (syntax-parser
-    [(_ [name:id init:racket-expr] ...)
-     #'(begin
-         (define reg-hash (hash 'name init ...))
-         (define (print-registers)
-           (for ([(k v) reg-hash])
-             (printf "~a: ~a\n" k v))))]))
+    (displayln "not yet implemented")))
 
+(define-syntax print-registers
+  (syntax-parser
+    (displayln "not yet implemented")))
 
-
+;; Example Usage
+#;(asm-block
+  (registers [('rax '()) ('rbx '()) ('rcx '())])
+  [(cmp 'rax 'rbx)
+   (jne 'error)
+   (mov 'rcx 10)
+   (jmp 'exit)
+   (label 'error)
+   (mov 'rax 10)
+   (label 'exit)])
