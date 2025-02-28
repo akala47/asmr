@@ -3,45 +3,48 @@
 (require syntax-spec-v3
          (for-syntax syntax/parse racket/list))
 
-(binding-class registers #:reference-compiler mutable-reference-compiler)
-(binding-class label #:reference-compiler immutable-reference-compiler)
+
+
 
 (syntax-spec
+ (binding-class register)
+ (binding-class label)
+ 
   (host-interface/expression
     (asm-block registers:registers-spec [inst:instruction-spec ...])
-    #:binding (scope registers (import inst) ...)
+    #:binding (scope (import registers) (import inst) ...)
     #'(compile-asm-instructions registers inst ...)) ;; Compile to Racket using bound variables
   
-  (nonterminal registers-spec
-    (registers ([(quote reg-name) (quote initial-value)] ...)))
+  (nonterminal/exporting registers-spec
+    (registers ([reg-name:register e:arith-expr] ...))
+    #:binding ((export reg-name) ...))
 
-  (nonterminal print-spec
-    #'(print-registers registers))
-
+  (nonterminal arith-expr
+    n:number
+    (+ e1:arith-expr e2:arith-expr))
+  
   (nonterminal/exporting instruction-spec
     (label lbl:label)
     #:binding (export lbl) ;; Note: We want to export the label from our nonterminal to machine host interface 
-    (cmp (quote reg1) (quote reg2)) ;; Instruction syntax not yet implemented
+    (print-registers)
+    (cmp reg1:register reg2:register) ;; Instruction syntax not yet implemented
     (jne lbl:label)
-    (mov (quote reg) val:number)
+    (mov reg:register val:arith-expr)
     (jmp lbl:label)))
 
 (define-syntax compile-asm-instructions
   (syntax-parser
     (displayln "not yet implemented")))
 
-(define-syntax print-registers
-  (syntax-parser
-    (displayln "not yet implemented")))
 
 ;; Example Usage
 (asm-block
-  (registers [('rax '()) ('rbx '()) ('rcx '())])
-  [(cmp 'rax 'rbx)
-   (jne 'error)
-   (mov 'rcx 10)
-   (jmp 'exit)
-   (label 'error)
-   (mov 'rax 10)
-   (label 'exit)]
-  (print-registers))
+  (registers [(rax 0) (rbx 0) (rcx 0)])
+  [(cmp rax rbx)
+   (jne error)
+   (mov rcx 10)
+   (jmp exit)
+   (label error)
+   (mov rax 10)
+   (label exit)
+   (print-registers)])
