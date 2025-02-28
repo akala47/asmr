@@ -3,8 +3,6 @@
 (require syntax-spec-v3
          (for-syntax syntax/parse))
 
-
-
 (syntax-spec
  (binding-class register-spec)
 
