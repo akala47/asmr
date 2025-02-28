@@ -35,7 +35,7 @@
     (displayln "not yet implemented")))
 
 ;; Example Usage
-#;(asm-block
+(asm-block
   (registers [('rax '()) ('rbx '()) ('rcx '())])
   [(cmp 'rax 'rbx)
    (jne 'error)
@@ -43,4 +43,5 @@
    (jmp 'exit)
    (label 'error)
    (mov 'rax 10)
-   (label 'exit)])
+   (label 'exit)]
+  (print-registers))
