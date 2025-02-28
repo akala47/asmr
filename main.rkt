@@ -3,8 +3,8 @@
 (require syntax-spec-v3
          (for-syntax syntax/parse racket/list))
 
-
-(binding-class label #:reference-compiler mutable-reference-compiler)
+(binding-class registers #:reference-compiler mutable-reference-compiler)
+(binding-class label #:reference-compiler immutable-reference-compiler)
 
 (syntax-spec
   (host-interface/expression
