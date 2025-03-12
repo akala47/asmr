@@ -4,8 +4,6 @@
          (for-syntax syntax/parse racket/list))
 
 
-
-
 (syntax-spec
  (binding-class register)
  (binding-class label)
