@@ -1,0 +1,28 @@
+#lang racket
+
+;;; (require racket/mutability)
+
+
+(define registers
+  (make-hash '((rax . 0) (rbx . 0) (rcx . 0))))
+
+
+(displayln "Initial registers:")
+(for ([(k v) (in-hash registers)])
+  (displayln (format "  ~a => ~a" k v)))
+(newline)
+
+(let ()
+(hash-set! registers 'rax (lambda (x) (+ x 10)))
+
+(displayln "Registers after storing a lambda in 'rax:")
+(for ([(k v) (in-hash registers)])
+  (cond
+    [(procedure? v)
+     (displayln (format "  ~a => <procedure>" k))]
+    [else
+     (displayln (format "  ~a => ~a" k v))]))
+(newline)
+
+(displayln (format "((hash-ref registers 'rax) 5) => ~a"
+                   ((hash-ref registers 'rax) 5)))
