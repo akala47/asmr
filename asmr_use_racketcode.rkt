@@ -29,3 +29,19 @@
   (displayln "----FINAL REGISTERS---")
   (for ([(k v) (in-hash registers)])
     (displayln (format "  ~a => ~a" k v))))
+
+;; Expected output
+
+;;; ----Initial registers----
+;;;   rax => 0
+;;;   rbx => 0
+;;;   rcx => 0
+
+;;;   rax => 0
+;;;   rbx => 0
+;;;   rcx => 10
+
+;;; ----FINAL REGISTERS---
+;;;   rax => 0
+;;;   rbx => 0
+;;;   rcx => 10

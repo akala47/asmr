@@ -1,5 +1,6 @@
 #lang racket
 
+(provide asm-block)
 (require syntax-spec-v3
          (for-syntax syntax/parse racket/list))
 
@@ -33,9 +34,21 @@
 (define-syntax compile-asm-instructions
   (syntax-parser
     [(_ (registers reg) [inst ...])
-    
+     
      ]))
 
+#;
+(compile-asm-instructions 
+  (registers [(rax 0) (rbx 0) (rcx 0)])
+    [(print-registers)
+     (cmp rax rbx)])
+
+Macro Expansion -> (apply-inst
+  (print-registers)
+    (apply-inst 
+      (cmp rax rbx)
+      reg))
+;#
 
 (define-syntax apply-inst
   (syntax-parser
