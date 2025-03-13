@@ -132,7 +132,7 @@ a stepper would be worked upon, as much as time permits.
 
 
 
-This design document reflects the current specification as of February 13, 2025.
+This design document reflects the current specification as of March 13, 2025.
 It shall continue to evolve along the course of this class according to feedback
 given by our peers and professors.
 
