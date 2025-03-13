@@ -115,26 +115,45 @@ a stepper would be worked upon, as much as time permits.
 <src> ::= <imm> | <reg>
 ```
 
-## Usage Example
+## Usage Example - Updated version 1
 ```racket
+;;NOTE: For Racket Operations
+#lang racket
+
+(require asmr/asm-block)
+
 (asm-block
-  (registers [('rax '()) ('rbx '()) ('rcx '())])
-  [(cmp 'rax 'rbx)
-   (jne 'error)
-   (mov 'rcx 10)
-   (jmp 'exit)
-   (label 'error)
-   (mov 'rax 10)
-   (label 'exit)])
+  (registers [(rax 0) (rbx 0) (rcx 0)])
+  [(cmp rax rbx)
+   (jne error)
+   (mov rcx 10)
+   (jmp exit)
+   (label error)
+   (mov rax 10)
+   (label exit)
+   (print-registers)])
+
+;;____EXPECTED OUTPUT____
+
+;;| Register : Value |
+;;+------------+--------+
+;;| 'rax : 0
+;;| 'rbx : 0 
+;;| 'rcx : 10
+;;+------------+--------+
+
 ```
 
 
 
+### V1 Botched Attempt :
+For the V1 attempt, we considered a few ways to go about designing the macro compiler while keeping a few things in mind. We initially used syntax-spec for
+the macro structure our DSL would have. The v1 compiler is a WIP(shelved) as of now but we have the macro expansion that will guide compiler development and feature addition on the DSL. 
 
 
-This design document reflects the current specification as of February 13, 2025.
-It shall continue to evolve along the course of this class according to feedback
-given by our peers and professors.
+
+This design document reflects the current specification as of March 13, 2025.
+It shall continue to evolve along the course of this class according to feedback given by our peers and professors.
 
 
 Made By:
