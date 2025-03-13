@@ -1,3 +1,2 @@
-main.rkt~
-
-#main.rkt#1#
+*.rkt~
+*.rkt.save
