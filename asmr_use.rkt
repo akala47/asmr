@@ -4,18 +4,21 @@
 (require asmr/asm-block)
 
 (asm-block
- (registers [(‘rax ‘())
- (‘rbx ‘())])
- [(mov ‘rax 0)
- (mov ‘rbx 20)
- (add ‘rax (* 4 5)) ; evaluate nested sexp
- (sub ‘rax ‘rbx)])
+  (registers [(rax 0) (rbx 0) (rcx 0)])
+  [(cmp rax rbx)
+   (jne error)
+   (mov rcx 10)
+   (jmp exit)
+   (label error)
+   (mov rax 10)
+   (label exit)
+   (print-registers)])
 
-;;____EXPECTED_OUTPUT____
+;;____EXPECTED OUTPUT____
 
+;;| Register : Value |
 ;;+------------+--------+
-;;| Register | Value |
-;;+------------+--------+
-;;| 'rax | 0 |
-;;| 'rbx | 20 |
+;;| 'rax : 0
+;;| 'rbx : 0 
+;;| 'rcx : 10
 ;;+------------+--------+
