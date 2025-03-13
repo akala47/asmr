@@ -9,7 +9,7 @@
             ["rbx" . 0]
             ["rcx" . 0])))
 
-  (displayln "Initial registers:")
+  (displayln "----Initial registers----")
   (for ([(k v) (in-hash registers)])
     (displayln (format "  ~a => ~a" k v)))
   (newline)
