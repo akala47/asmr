@@ -1,4 +1,5 @@
-;;NOTE: For Racket Operations
+;; NOTE: For Racket Operations
+
 #lang racket
 
 (require asmr/asm-block)
@@ -16,9 +17,10 @@
 
 ;;____EXPECTED OUTPUT____
 
-;;| Register : Value |
-;;+------------+--------+
-;;| 'rax : 0
-;;| 'rbx : 0 
-;;| 'rcx : 10
-;;+------------+--------+
+;; +------------+--------+
+;; | Register   : Value  |
+;; +------------+--------+
+;; | 'rax       : 0      |
+;; | 'rbx       : 0      |
+;; | 'rcx       : 10     |
+;; +------------+--------+
