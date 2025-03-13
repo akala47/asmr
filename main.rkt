@@ -3,7 +3,6 @@
 (require syntax-spec-v3
          (for-syntax syntax/parse racket/list))
 
-
 (syntax-spec
  (binding-class register)
  (binding-class label)
@@ -32,34 +31,9 @@
 
 (define-syntax compile-asm-instructions
   (syntax-parser
-    [(_ (registers reg) [inst ...])
-    
-     ]))
-
-
-(define-syntax apply-inst
-  (syntax-parser
-    [print-registers reg]
-    (begin
-    #'(displayln reg)
-    reg)))
-
-#;(define-syntax compile-asm-instructions
-  (syntax-parser
-    [(_ (registers reg) [inst ...])
-     (let* ([inst-lis (syntax->list #'(inst ...))])
-      (compile-instruction-list-rec reg inst-lis))
-      ]))
+    (displayln "not yet implemented")))
 
 (asm-block
-  (registers [(rax 0) (rbx 0) (rcx 0)])
-  [(print-registers)
-   (mov rcx 10)])
-
-
-
-
-#;(asm-block
   (registers [(rax 0) (rbx 0) (rcx 0)])
   [(cmp rax rbx)
    (jne error)
