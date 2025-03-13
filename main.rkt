@@ -30,28 +30,33 @@
     (mov reg:register val:arith-expr)
     (jmp lbl:label)))
 
-#;(define-syntax compile-asm-instructions
-  (syntax-parser
-    (displayln "not yet implemented")))
-
-
 (define-syntax compile-asm-instructions
+  (syntax-parser
+    [(_ (registers reg) [inst ...])
+    
+     ]))
+
+
+(define-syntax apply-inst
+  (syntax-parser
+    [print-registers reg]
+    (begin
+    #'(displayln reg)
+    reg)))
+
+#;(define-syntax compile-asm-instructions
   (syntax-parser
     [(_ (registers reg) [inst ...])
      (let* ([inst-lis (syntax->list #'(inst ...))])
       (compile-instruction-list-rec reg inst-lis))
-     ]))
-
-(define-syntax compile-instruction-list-rec
-  (syntax-parser
-    [
-      
-    ]))
-
+      ]))
 
 (asm-block
   (registers [(rax 0) (rbx 0) (rcx 0)])
-  [(print-registers)])
+  [(print-registers)
+   (mov rcx 10)])
+
+
 
 
 #;(asm-block
