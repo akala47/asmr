@@ -29,3 +29,18 @@
   (displayln "----FINAL REGISTERS---")
   (for ([(k v) (in-hash registers)])
     (displayln (format "  ~a => ~a" k v))))
+;;----------------------------------------------------------------------------------------------------
+
+#;(asm-block 
+   (cmp rax rbx)
+   (jne error)
+   (mov rcx 10)
+   (jmp exit)
+   (label error)
+   (mov rax 10)
+   (label exit)
+   (print-registers))
+
+(define rax 0)
+(define rbx 0)
+

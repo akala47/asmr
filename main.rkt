@@ -5,7 +5,7 @@
 
 (syntax-spec
  ;; Binding class for registers
- ;(binding-class register)
+ (binding-class register)
 
  (host-interface/expression
   (asm-block inst:instruction-spec ...)
@@ -18,16 +18,16 @@
    e:racket-expr)
 
  
- (nonterminal/exporting register
-   r:racket-var
+ (nonterminal/exporting register-spec
+   r:register
    #:binding (export r))
 
  
  (nonterminal instruction-spec
-   (cmp reg1:register reg2:register)
+   (cmp reg1:register-spec reg2:register-spec)
    #:binding (scope(import reg1) (import reg2))  ; Import registers
 
-   (mov reg:register val:arith-expr)
+   (mov reg:register-spec val:arith-expr)
    #:binding (scope (import reg) val)  ; Import register
 
    (print-registers)))
