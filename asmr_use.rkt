@@ -1,19 +1,18 @@
-;; NOTE: For Racket Operations
-
 #lang racket
+
+;; NOTE: For Racket Operations
 
 (require asmr/asm-block)
 
 (asm-block
-  (registers [(rax 0) (rbx 0) (rcx 0)])
-  [(cmp rax rbx)
+   (cmp rax rbx)
    (jne error)
    (mov rcx 10)
    (jmp exit)
    (label error)
    (mov rax 10)
    (label exit)
-   (print-registers)])
+   (print-registers))
 
 ;;____EXPECTED OUTPUT____
 
