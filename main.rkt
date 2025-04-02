@@ -3,63 +3,51 @@
 (require syntax-spec-v3
          (for-syntax syntax/parse racket))
 
-
-
-
-
 (syntax-spec
- (binding-class label)
- 
-
- #;(host-interface/expression
-    (asm-block (run-instructions) [inst:instruction-spec ...])
-    #:binding (scope (import inst) ...))
-
- #;(host-interface/expression
-    (asm-block [inst:instruction-spec ...])
-    #:binding (scope (import inst) ...)
-    #'(#,(compile-asm-instructions inst ...)))  ;; Compile to Racket using bound variables
-
+ ;; Binding class for registers
+ ;(binding-class register)
 
  (host-interface/expression
-  (asm-block [inst:instruction-spec ...])
+  (asm-block inst:instruction-spec ...)
   #:binding (inst ...)
-  #'(begin #,(compile-asm-instructions inst ...)))
+  #'(compile-asm-instructions inst ...))
 
 
  (nonterminal arith-expr
-              n:number
-              (+ e1:arith-expr e2:arith-expr)
-              (- e1:arith-expr e2:arith-expr)
-              (* e1:arith-expr e2:arith-expr))
+   n:number
+   e:racket-expr)
 
+ 
  (nonterminal/exporting register
-                        var:racket-var
-                        #:binding (scope (bind var)))
-  
+   r:racket-var
+   #:binding (export r))
+
+ 
  (nonterminal instruction-spec
-                        (cmp reg1:register reg2:register)
-                        #:binding (scope (import reg1) (import reg2))
+   (cmp reg1:register reg2:register)
+   #:binding (scope(import reg1) (import reg2))  ; Import registers
 
-                        (mov reg:register val:arith-expr)
-                        #:binding (scope (bind reg) val)
+   (mov reg:register val:arith-expr)
+   #:binding (scope (import reg) val)  ; Import register
 
-                        (print-registers)))
+   (print-registers)))
 
-
-
+;; TODO
 (define-syntax compile-asm-instructions
   (syntax-parser
-    (display ("final-macro not implemented"))))
+    [(_ inst ...)
+     #'(length `(syntax->list inst ...))]))
 
-;;(define reg-lam (λ (
+;; Example usage
+(asm-block
+ (mov rax 10)
+ (mov rbx 20)
+ (cmp rax rbx)
+ (print-registers))
 
 (asm-block
- (cmp rax rbx)
- ;(jne error)
- (mov rcx 10)
- ;(jmp exit)
- ;(label error)
  (mov rax 10)
- ;(label exit)
+ (mov rbx 20)
+ (cmp rax rbx)
+ (mov rax 10)
  (print-registers))
