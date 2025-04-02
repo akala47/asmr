@@ -78,7 +78,12 @@
 
 
 (asm-block
- (registers [(rax 0) (rbx 10) (rcx 0)])
- [(mov rax 10)
-  (cmp rax rbx)
-  (print-registers)])
+  (registers [(rax 0) (rbx 0) (rcx 0)])
+  [(cmp rax rbx)        ; 0
+   (jne error)          ; 1
+   (mov rcx 10)         ; 2
+   (jmp exit)           ; 3
+   (label error)        ; 4
+   (mov rax 10)         ; 5
+   (label exit)         ; 6
+   (print-registers)])  ; 7
