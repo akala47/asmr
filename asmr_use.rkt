@@ -2,7 +2,7 @@
 
 #lang racket
 
-(require asmr/asm-block)
+(require "main.rkt")
 
 (asm-block
   (registers [(rax 0) (rbx 0) (rcx 0)])
@@ -36,3 +36,13 @@
    (mov rax 10)
    (label exit)
    (print-registers)])
+
+;;____EXPECTED OUTPUT____
+
+;; +------------+--------+
+;; | Register   : Value  |
+;; +------------+--------+
+;; | 'rax       : 0      |
+;; | 'rbx       : 0      |
+;; | 'rcx       : 10     |
+;; +------------+--------+
