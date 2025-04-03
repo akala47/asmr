@@ -54,8 +54,6 @@
          (let* ([registers-list (cadr (syntax->datum #'registers))]
                 [instr-list (syntax->list #'(instrs ...))])
 
-           #;(for ([inst instr-list])
-             (displayln "ADD Label and Instruction Index to label-index-map"))
            (for ([inst instr-list] [i (in-naturals)])
              (syntax-case inst ()
                [(label-id lbl)
@@ -63,38 +61,47 @@
                 (hash-set! label-index-map (syntax->datum #'lbl) i)]
                [_ (void)]))
               
-           
            (for ([reg registers-list])
              (let ([reg-name (first reg)] 
                    [reg-value (second reg)])
                (register-set! registers-map reg-name reg-value)))
-           
-           #,@(for/list ([instr (syntax->list #'(instrs ...))])
-                (syntax-parse instr
-                  [((~datum cmp) reg1 reg2)
-                   #`(let* ([val1 (register-get registers-map 'reg1)]
-                            [val2 (register-get registers-map 'reg2)])
-                       (compare val1 val2))]
-                  [((~datum jne) lbl)
-                   #'(displayln "2. Jump if not equal")]
-                  [((~datum mov) reg val)
-                   #`(register-set! registers-map 'reg val)]
-                  [((~datum jmp) lbl)
-                   #'(displayln "4. Unconditional jump")]
-                  [((~datum label) lbl)
-                   #'(displayln instr-list)]
-                  [(print-registers) #`(display-registers registers-map)]
-                  [_ #'(displayln "7. Unknown")]))
+
+           (let loop ([pc 0])
+             (when (< pc (length instr-list))
+               (let ([inst (list-ref instr-list pc)])
+                 #`(syntax-parse inst
+                     [((~datum cmp) reg1 reg2)
+                      (let* ([val1 (register-get registers-map 'reg1)]
+                             [val2 (register-get registers-map 'reg2)])
+                        (compare val1 val2))
+                      (loop (+ pc 1))]
+                     [((~datum jne) lbl)
+                      (if compare-flag
+                          (loop (+ pc 1))
+                          (loop (hash-ref label-index-map 'lbl)))]
+                     [((~datum mov) reg val)
+                      (register-set! registers-map 'reg val)
+                      (loop (+ pc 1))]
+                     [((~datum jmp) lbl)
+                      (loop (hash-ref label-index-map 'lbl))]
+                     [((~datum label) lbl) (loop (+ pc 1))]
+                     [(print-registers)
+                      (display-registers registers-map)
+                      (loop (+ pc 1))]
+                     [_ 
+                      (displayln "Unknown instruction")
+                      (loop (+ pc 1))]))))
+
            (void)))]))
 
 
 (asm-block
-  (registers [(rax 0) (rbx 0) (rcx 0)])
-  [(cmp rax rbx)        ; 0
-   (jne error)          ; 1
-   (mov rcx 10)         ; 2
-   (jmp exit)           ; 3
-   (label error)        ; 4
-   (mov rax 10)         ; 5
-   (label exit)         ; 6
-   (print-registers)])  ; 7
+ (registers [(rax 0) (rbx 0) (rcx 0)])
+ [(cmp rax rbx)        ; 0
+  (jne error)          ; 1
+  (mov rcx 10)         ; 2
+  (jmp exit)           ; 3
+  (label error)        ; 4
+  (mov rax 10)         ; 5
+  (label exit)         ; 6
+  (print-registers)])  ; 7
