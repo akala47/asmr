@@ -34,8 +34,8 @@
                         (sub reg:register val:arith-expr)
                         (jmp lbl:label)))
 
-(define (register-set! map reg val) (hash-set! map reg val))
-(define (register-get map reg) (hash-ref map reg #f))
+(define (register-set! reg val) (hash-set! registers-map reg val))
+(define (register-get reg) (hash-ref registers-map reg #f))
 
 (define (display-registers registers-map)
   (begin
@@ -80,15 +80,15 @@
            (for ([reg registers-list])
              (let ([reg-name (first reg)] 
                    [reg-value (second reg)])
-               (register-set! registers-map reg-name reg-value)))
+               (register-set! reg-name reg-value)))
 
            (let loop ([pc 0])
              (when (< pc (length instr-list))
                (let ([inst (list-ref instr-list pc)])
                  (match inst
                    [(list 'cmp reg1 reg2)
-                    (let* ([val1 (register-get registers-map reg1)]
-                           [val2 (register-get registers-map reg2)])
+                    (let* ([val1 (register-get reg1)]
+                           [val2 (register-get reg2)])
                       (compare val1 val2)
                       (loop (add1 pc)))]
 
@@ -97,8 +97,8 @@
                         (let ([dest-val (register-get registers-map dest)]
                               [src-val (register-get registers-map src)])
                           (register-set! registers-map dest (+ dest-val src-val)))
-                        (let ([dest-val (register-get registers-map dest)])
-                          (register-set! registers-map dest (+ dest-val src))))
+                        (let ([dest-val (register-get dest)])
+                          (register-set! dest (+ dest-val src))))
                     (loop (add1 pc))]
 
                    [(list 'add dest src)
@@ -124,9 +124,9 @@
 
                    [(list 'mov reg val)
                     (if (symbol? val)
-                        (let ([source-val (register-get registers-map val)])
-                          (register-set! registers-map reg source-val))
-                        (register-set! registers-map reg val))
+                        (let ([source-val (register-get val)])
+                          (register-set! reg source-val))
+                        (register-set! reg val))
                     (loop (add1 pc))]
 
                    [(list 'jmp lbl)
