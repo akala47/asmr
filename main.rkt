@@ -17,11 +17,7 @@
                         (registers ([reg-name:register e:arith-expr] ...))
                         #:binding ((export reg-name) ...))
 
- (nonterminal arith-expr
-              n:number
-              (+ e1:arith-expr e2:arith-expr)
-              (- e1:arith-expr e2:arith-expr)
-              (* e1:arith-expr e2:arith-expr))
+ (nonterminal arith-expr n:number)
   
  (nonterminal/exporting instruction-spec
                         (label lbl:label)
@@ -30,12 +26,30 @@
                         (cmp reg1:register reg2:register)
                         (je lbl:label)
                         (jne lbl:label)
+                        (mov reg1:register reg2:register)
                         (mov reg:register val:arith-expr)
+                        (add reg1:register reg2:register)
+                        (add reg:register val:arith-expr)
+                        (sub reg1:register reg2:register)
+                        (sub reg:register val:arith-expr)
                         (jmp lbl:label)))
 
 (define (register-set! map reg val) (hash-set! map reg val))
 (define (register-get map reg) (hash-ref map reg #f))
-(define (display-registers map) (displayln map))
+
+(define (display-registers registers-map)
+  (begin
+    (newline)
+    (display "Registers State:")
+    (newline)
+    (for-each 
+      (lambda (reg-val-pair)
+        (let ([reg (car reg-val-pair)]
+              [val (cdr reg-val-pair)])
+          (display (format "~a: ~a" reg val))
+          (newline)))
+      (hash->list registers-map))))
+
 (define registers-map (make-hash))
 (define label-index-map (make-hash))
 (define compare-flag #f)
@@ -78,6 +92,24 @@
                       (compare val1 val2)
                       (loop (add1 pc)))]
 
+                   [(list 'add dest src)
+                    (if (symbol? src)
+                        (let ([dest-val (register-get registers-map dest)]
+                              [src-val (register-get registers-map src)])
+                          (register-set! registers-map dest (+ dest-val src-val)))
+                        (let ([dest-val (register-get registers-map dest)])
+                          (register-set! registers-map dest (+ dest-val src))))
+                    (loop (add1 pc))]
+
+                   [(list 'add dest src)
+                    (if (symbol? src)
+                        (let ([dest-val (register-get registers-map dest)]
+                              [src-val (register-get registers-map src)])
+                          (register-set! registers-map dest (- dest-val src-val)))
+                        (let ([dest-val (register-get registers-map dest)])
+                          (register-set! registers-map dest (- dest-val src))))
+                    (loop (add1 pc))]
+                   
                    [(list 'je lbl)
                     (let* ([lbl-index (hash-ref label-index-map lbl)])
                       (if compare-flag
@@ -91,9 +123,11 @@
                           (loop (add1 pc))))]
 
                    [(list 'mov reg val)
-                    (begin
-                      (register-set! registers-map reg val)
-                      (loop (add1 pc)))]
+                    (if (symbol? val)
+                        (let ([source-val (register-get registers-map val)])
+                          (register-set! registers-map reg source-val))
+                        (register-set! registers-map reg val))
+                    (loop (add1 pc))]
 
                    [(list 'jmp lbl)
                     (let* ([lbl-index (hash-ref label-index-map lbl)])
@@ -121,3 +155,13 @@
   (mov rax 10)         ; 5
   (label exit)         ; 6
   (print-registers)])  ; 7
+
+
+(asm-block
+ (registers [(rax 0) (rbx 0) (rcx 0)])
+ [(mov rax 10)
+  (print-registers)
+  (mov rbx 5)
+  (add rax 10)
+  (mov rcx rax)
+  (print-registers)])
