@@ -52,9 +52,22 @@
                         ;; Unconditional Jump Instruction
                         (jmp lbl:label)))
 
+;; Hash map to store register values
+(define registers-map (make-hash))
+
+;; Hash map to store label indices
+(define label-index-map (make-hash))
+
+;; Flag indicating the result of the last comparison operation
+(define compare-flag #f)
+
+;; Function to set a register's value in the registers hash map
 (define (register-set! reg val) (hash-set! registers-map reg val))
+
+;; Function to get a register's value from the registers hash map
 (define (register-get reg) (hash-ref registers-map reg #f))
 
+;; Function to display the current state of all registers
 (define (display-registers registers-map)
   (begin
     (newline)
@@ -68,10 +81,7 @@
          (newline)))
      (hash->list registers-map))))
 
-(define registers-map (make-hash))
-(define label-index-map (make-hash))
-(define compare-flag #f)
-
+;; Function to compare two values and set the comparison flag accordingly.
 (define (compare v1 v2)
   (begin
     (if (or (false? v1)
@@ -537,4 +547,13 @@
                 (label middle)
                 (label end)
                 (print-registers)])))])
-      (check-true (string-contains? output "rax: 10")))))
+      (check-true (string-contains? output "rax: 10"))))
+
+  #;(test-case "Unbound Register"
+    (let ([output
+           (capture-output
+            (lambda ()
+              (asm-block
+               (registers [])
+               [(mov rax 10)])))])
+      (check-true (string-contains? output "mov: not bound as register in: rax")))))
