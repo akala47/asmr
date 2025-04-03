@@ -11,7 +11,7 @@
  (host-interface/expression
   (asm-block registers:registers-spec [inst:instruction-spec ...])
   #:binding (scope (import registers) (import inst) ...)
-  #'(compile-asm-instructions registers [inst ...])) ;; Compile to Racket using bound variables
+  #'(compile-asm-instructions registers [inst ...]))
   
  (nonterminal/exporting registers-spec
                         (registers ([reg-name:register e:arith-expr] ...))
@@ -28,6 +28,7 @@
                         #:binding (export lbl)
                         (print-registers)
                         (cmp reg1:register reg2:register)
+                        (je lbl:label)
                         (jne lbl:label)
                         (mov reg:register val:arith-expr)
                         (jmp lbl:label)))
@@ -53,14 +54,13 @@
     [(_ registers [instrs ...])
      #`(begin
          (let* ([registers-list (cadr (syntax->datum #'registers))]
-                [instr-list (syntax->list #'(instrs ...))])
-
+                [instr-list (list 'instrs ...)])
+           
            (for ([inst instr-list]
                  [i (in-naturals)])
-             (syntax-case inst ()
-               [(label-id lbl)
-                (and (identifier? #'label-id) (eq? 'label (syntax->datum #'label-id)))
-                (hash-set! label-index-map (syntax->datum #'lbl) i)]
+             (match inst
+               [(list 'label lbl)
+                (hash-set! label-index-map lbl i)]
                [_ (void)]))
               
            (for ([reg registers-list])
@@ -68,49 +68,53 @@
                    [reg-value (second reg)])
                (register-set! registers-map reg-name reg-value)))
 
-           (loop go ([pc 0])
-                 
-                 (when (< pc (length instr-list))
-                   (let* ([inst `(list-ref instr-list pc)])
-                     #`(syntax-parse inst
-                         [((~datum cmp) reg1 reg2)
-                          (let* ([val1 (register-get registers-map 'reg1)]
-                                 [val2 (register-get registers-map 'reg2)])
-                            (compare val1 val2)
-                            (go (add1 pc))
-                            (displayln "CHUT"))
-                          ]
-                         [((~datum jne) lbl)
-                          (let* ([lbl-index (hash-ref label-index-map 'lbl)])
-                            (if compare-flag
-                                (go (add1 pc))
-                                (go lbl-index))
-                            (displayln "CHUT"))]
-                         [((~datum mov) reg val)
-                          (begin
-                            (register-set! registers-map 'reg val)
-                            (go (add1 pc))
-                            (displayln "CHUT"))]
-                         [((~datum jmp) lbl)
-                          (let* ([lbl-index (hash-ref label-index-map 'lbl)])
-                            (go lbl-index)
-                            (displayln "CHUT"))]
-                         [((~datum label) lbl) (go (add1 pc))]
-                         [(print-registers)
-                          (begin
-                            (display-registers registers-map)
-                            (go (add1 pc))
-                            (displayln "CHUT"))]
-                         [_ 
-                          (displayln "Unknown instruction")
-                          (go (add1 pc))]))))
+           (let loop ([pc 0])
+             (when (< pc (length instr-list))
+               (let ([inst (list-ref instr-list pc)])
+                 (match inst
+                   [(list 'cmp reg1 reg2)
+                    (let* ([val1 (register-get registers-map reg1)]
+                           [val2 (register-get registers-map reg2)])
+                      (compare val1 val2)
+                      (loop (add1 pc)))]
+
+                   [(list 'je lbl)
+                    (let* ([lbl-index (hash-ref label-index-map lbl)])
+                      (if compare-flag
+                          (loop lbl-index)
+                          (loop (add1 pc))))]
+                   
+                   [(list 'jne lbl)
+                    (let* ([lbl-index (hash-ref label-index-map lbl)])
+                      (if (not compare-flag)
+                          (loop lbl-index)
+                          (loop (add1 pc))))]
+
+                   [(list 'mov reg val)
+                    (begin
+                      (register-set! registers-map reg val)
+                      (loop (add1 pc)))]
+
+                   [(list 'jmp lbl)
+                    (let* ([lbl-index (hash-ref label-index-map lbl)])
+                      (loop lbl-index))]
+
+                   [(list 'label _)
+                    (loop (add1 pc))]
+
+                   [print-registers
+                    (begin
+                      (display-registers registers-map)
+                      (loop (add1 pc)))]
+
+                   [_ (error "Unknown instruction" inst)]))))
            (void)))]))
 
 
 (asm-block
  (registers [(rax 0) (rbx 0) (rcx 0)])
  [(cmp rax rbx)        ; 0
-  (jne error)          ; 1
+  (je error)           ; 1
   (mov rcx 10)         ; 2
   (jmp exit)           ; 3
   (label error)        ; 4
