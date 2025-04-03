@@ -27,7 +27,7 @@
                         ;; Pretty Print Registers
                         (print-registers)
 
-                        ;; Compare Instruction
+                        ;; CMP Instruction
                         (cmp reg1:register reg2:register)
                         (cmp reg:register val:arith-expr)
 
@@ -37,17 +37,21 @@
                         ;; Conditional Jump (If Not Equals) Instruction
                         (jne lbl:label)
 
-                        ;; Move Instruction
+                        ;; MOV Instruction
                         (mov reg1:register reg2:register)
                         (mov reg:register val:arith-expr)
 
-                        ;; Add Instruction
+                        ;; ADD Instruction
                         (add reg1:register reg2:register)
                         (add reg:register val:arith-expr)
 
-                        ;; Sub Instruction
+                        ;; SUB Instruction
                         (sub reg1:register reg2:register)
                         (sub reg:register val:arith-expr)
+
+                        ;; IMUL Instruction
+                        (imul reg1:register reg2:register)
+                        (imul reg:register val:arith-expr)
 
                         ;; Unconditional Jump Instruction
                         (jmp lbl:label)))
@@ -95,26 +99,31 @@
   (syntax-parser
     [(_ registers [instrs ...])
      #`(begin
+         ;; Process register definitions and and instructions
          (let* ([registers-list (cadr (syntax->datum #'registers))]
                 [instr-list (list 'instrs ...)])
-           
+
+           ;; Process labels to map them to instruction indices
            (for ([inst instr-list]
                  [i (in-naturals)])
              (match inst
                [(list 'label lbl)
                 (hash-set! label-index-map lbl i)]
                [_ (void)]))
-              
+
+           ;; Initialize registers with their specified initial values
            (for ([reg registers-list])
              (let ([reg-name (first reg)] 
                    [reg-value (second reg)])
                (register-set! reg-name reg-value)))
-
+           
+           ;; Helper function for executing comparison instructions
            (define (exec-cmp reg val)
              (if (symbol? val)
                  (compare (register-get reg) (register-get val))
                  (compare (register-get reg) val)))
 
+           ;; Helper function for executing arithmetic operations
            (define (exec-arithmetic op dest src)
              (let ([dest-val (register-get dest)]
                    [src-val (if (symbol? src) 
@@ -122,7 +131,8 @@
                                 src)])
                (register-set! dest ((case op
                                       ['+ +]
-                                      ['- -]) dest-val src-val))))
+                                      ['- -]
+                                      ['* *]) dest-val src-val))))
            
            (let loop ([pc 0])
              (when (< pc (length instr-list))
@@ -141,6 +151,10 @@
 
                    [(list 'sub dest src)
                     (exec-arithmetic '- dest src)
+                    (loop (+ pc 1))]
+
+                   [(list 'imul dest src)
+                    (exec-arithmetic '* dest src)
                     (loop (+ pc 1))]
 
                    [(list 'cmp reg val)
@@ -187,7 +201,8 @@
         (thunk))
       (get-output-string output-port)))
   
-  ;; 1. Register Initialization Tests
+  ;; Register Initialization Tests
+  
   (test-case "Simple Register Initialization"
              (let ([output
                     (capture-output
@@ -219,7 +234,8 @@
                (check-true (string-contains? output "rax: -5"))
                (check-true (string-contains? output "rbx: -10"))))
 
-  ;; 2. MOV Instruction Tests
+  ;; MOV Instruction Tests
+  
   (test-case "MOV Instruction with Immediate Value"
              (let ([output
                     (capture-output
@@ -266,7 +282,8 @@
                          (print-registers)])))])
                (check-true (string-contains? output "rax: -25"))))
 
-  ;; 3. ADD Instruction Tests
+  ;; ADD Instruction Tests
+  
   (test-case "ADD Instruction with Immediate Value"
              (let ([output
                     (capture-output
@@ -308,7 +325,8 @@
                          (print-registers)])))])
                (check-true (string-contains? output "rax: 10"))))
 
-  ;; 4. SUB Instruction Tests
+  ;; SUB Instruction Tests
+  
   (test-case "SUB Instruction with Immediate Value"
              (let ([output
                     (capture-output
@@ -351,7 +369,86 @@
                          (print-registers)])))])
                (check-true (string-contains? output "rax: 15"))))
 
-  ;; 5. CMP and Conditional Jump Tests
+  ;; IMUL Instruction Tests
+
+  (test-case "IMUL Instruction with Immediate Value"
+             (let ([output
+                    (capture-output
+                     (lambda ()
+                       (asm-block
+                        (registers [(rax 5)])
+                        [(imul rax 4)
+                         (print-registers)])))])
+               (check-true (string-contains? output "rax: 20"))))
+
+  (test-case "IMUL Instruction with Register Value"
+             (let ([output
+                    (capture-output
+                     (lambda ()
+                       (asm-block
+                        (registers [(rax 3) (rbx 7)])
+                        [(imul rax rbx)
+                         (print-registers)])))])
+               (check-true (string-contains? output "rax: 21"))
+               (check-true (string-contains? output "rbx: 7"))))
+
+  (test-case "IMUL Instruction with Negative Value"
+             (let ([output
+                    (capture-output
+                     (lambda ()
+                       (asm-block
+                        (registers [(rax -4)])
+                        [(imul rax 3)
+                         (print-registers)])))])
+               (check-true (string-contains? output "rax: -12"))))
+
+  (test-case "IMUL Instruction Resulting in Zero"
+             (let ([output
+                    (capture-output
+                     (lambda ()
+                       (asm-block
+                        (registers [(rax 0) (rbx 10)])
+                        [(imul rax rbx)
+                         (print-registers)])))])
+               (check-true (string-contains? output "rax: 0"))
+               (check-true (string-contains? output "rbx: 10"))))
+  
+  (test-case "IMUL Instruction with Both Negative Values"
+             (let ([output
+                    (capture-output
+                     (lambda ()
+                       (asm-block
+                        (registers [(rax -6) (rbx -7)])
+                        [(imul rax rbx)
+                         (print-registers)])))])
+               (check-true (string-contains? output "rax: 42"))
+               (check-true (string-contains? output "rbx: -7"))))
+
+ 
+  (test-case "IMUL Instruction by One"
+             (let ([output
+                    (capture-output
+                     (lambda ()
+                       (asm-block
+                        (registers [(rax 8)])
+                        [(imul rax 1)
+                         (print-registers)])))])
+               (check-true (string-contains? output "rax: 8"))))
+
+  (test-case "IMUL Instruction for Squaring a Value"
+             (let ([output
+                    (capture-output
+                     (lambda ()
+                       (asm-block
+                        (registers [(rax 5)])
+                        [(imul rax rax)
+                         (print-registers)])))])
+               (check-true (string-contains? output "rax: 25"))))
+
+ 
+  
+  ;; CMP and Conditional Jump Tests
+
   (test-case "CMP Instruction with Equal Values"
              (let ([output
                     (capture-output
@@ -448,7 +545,8 @@
                          (print-registers)])))])
                (check-true (string-contains? output "rcx: 2"))))
 
-  ;; 6. Unconditional Jump Tests
+  ;; Unconditional Jump Tests
+  
   (test-case "JMP Instruction"
              (let ([output
                     (capture-output
@@ -492,7 +590,8 @@
                (check-true (string-contains? output "rax: 3"))
                (check-true (string-contains? output "rbx: 0"))))
 
-  ;; 7. Complex Program Tests
+  ;; Complex Program Tests
+  
   (test-case "Random Program"
              (let ([output
                     (capture-output
@@ -528,7 +627,8 @@
                (check-true (string-contains? output "rbx: 100"))
                (check-true (string-contains? output "rcx: 100"))))
 
-  ;; 8. Edge Cases and Error Handling
+  ;; Edge Cases and Error Handling
+  
   (test-case "Empty Instruction List"
              (let ([output
                     (capture-output
