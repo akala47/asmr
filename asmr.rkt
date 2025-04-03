@@ -195,6 +195,7 @@
 (module+ test
   (require rackunit)
 
+  ;; Captures and returns all output printed to the current output port
   (define (capture-output thunk)
     (let ([output-port (open-output-string)])
       (parameterize ([current-output-port output-port])
