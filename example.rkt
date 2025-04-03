@@ -1,6 +1,6 @@
 #lang racket
 
-(require "main.rkt")
+(require "asmr.rkt")
 
 (asm-block
  (registers [(rax 0) (rbx 0) (rcx 0)])
