@@ -35,6 +35,7 @@
 (define (register-get map reg) (hash-ref map reg #f))
 (define (display-registers map) (displayln map))
 (define registers-map (make-hash))
+(define label-index-map (make-hash))
 (define compare-flag #f)
 
 (define (compare v1 v2)
@@ -50,7 +51,18 @@
   (syntax-parser
     [(_ registers [instrs ...])
      #`(begin
-         (let* ([registers-list (cadr (syntax->datum #'registers))])
+         (let* ([registers-list (cadr (syntax->datum #'registers))]
+                [instr-list (syntax->list #'(instrs ...))])
+
+           #;(for ([inst instr-list])
+             (displayln "ADD Label and Instruction Index to label-index-map"))
+           (for ([inst instr-list] [i (in-naturals)])
+             (syntax-case inst ()
+               [(label-id lbl)
+                (and (identifier? #'label-id) (eq? 'label (syntax->datum #'label-id)))
+                (hash-set! label-index-map (syntax->datum #'lbl) i)]
+               [_ (void)]))
+              
            
            (for ([reg registers-list])
              (let ([reg-name (first reg)] 
@@ -70,10 +82,9 @@
                   [((~datum jmp) lbl)
                    #'(displayln "4. Unconditional jump")]
                   [((~datum label) lbl)
-                   #'(displayln "5. Label defined")]
+                   #'(displayln instr-list)]
                   [(print-registers) #`(display-registers registers-map)]
                   [_ #'(displayln "7. Unknown")]))
-
            (void)))]))
 
 
