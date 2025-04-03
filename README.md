@@ -10,7 +10,7 @@ debugging capabilities.
 ## Key Features of ASMR
 
 - **Architecture Agnostic**: Setting custom registers enables emulating multiple platforms
-- **Debugging(Print)**: Built-in `print-registers` command for register/memory inspection
+- **Debugging (Print)**: Built-in `print-registers` command for register/memory inspection
 - **Flexible Register Configuration**: Ability to define set of registers per assembly block
   (treated as an environment/world)
 - **Syntax Validation**: Compile-time checks for register usage and instruction validity
@@ -23,7 +23,7 @@ Assembly. Some design decisions that were made were:
 
 - Having a Macros within a main Macro structure to define an environment
   with defined registers. The current version of our plan intends to have
-  a main macro(`asm-block`) which specifies the world(similar to `big-bang`)
+  a main macro(`asm-block`) which specifies the world (similar to `big-bang`)
   which then uses the `registers` macro to define the registers within that world.
 
 ### Validation System
@@ -39,7 +39,7 @@ The DSL performs compile-time checks for:
 
 ```racket
 ;;--------EXAMPLE VALIDATION--------
-;; (asm-block
+   (asm-block
     (registers [])
     [(mov rpx 10)])
 ;; -> mov: not bound as register in: rpx
