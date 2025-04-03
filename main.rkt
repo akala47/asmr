@@ -1,6 +1,7 @@
 #lang racket
 
 (require syntax-spec-v3
+         loop
          (for-syntax syntax/parse racket/list))
 
 (syntax-spec
@@ -24,9 +25,9 @@
   
  (nonterminal/exporting instruction-spec
                         (label lbl:label)
-                        #:binding (export lbl) ;; Note: We want to export the label from our nonterminal to machine host interface 
+                        #:binding (export lbl)
                         (print-registers)
-                        (cmp reg1:register reg2:register) ;; Instruction syntax not yet implemented
+                        (cmp reg1:register reg2:register)
                         (jne lbl:label)
                         (mov reg:register val:arith-expr)
                         (jmp lbl:label)))
@@ -54,7 +55,8 @@
          (let* ([registers-list (cadr (syntax->datum #'registers))]
                 [instr-list (syntax->list #'(instrs ...))])
 
-           (for ([inst instr-list] [i (in-naturals)])
+           (for ([inst instr-list]
+                 [i (in-naturals)])
              (syntax-case inst ()
                [(label-id lbl)
                 (and (identifier? #'label-id) (eq? 'label (syntax->datum #'label-id)))
@@ -66,32 +68,42 @@
                    [reg-value (second reg)])
                (register-set! registers-map reg-name reg-value)))
 
-           (let loop ([pc 0])
-             (when (< pc (length instr-list))
-               (let ([inst (list-ref instr-list pc)])
-                 #`(syntax-parse inst
-                     [((~datum cmp) reg1 reg2)
-                      (let* ([val1 (register-get registers-map 'reg1)]
-                             [val2 (register-get registers-map 'reg2)])
-                        (compare val1 val2))
-                      (loop (+ pc 1))]
-                     [((~datum jne) lbl)
-                      (if compare-flag
-                          (loop (+ pc 1))
-                          (loop (hash-ref label-index-map 'lbl)))]
-                     [((~datum mov) reg val)
-                      (register-set! registers-map 'reg val)
-                      (loop (+ pc 1))]
-                     [((~datum jmp) lbl)
-                      (loop (hash-ref label-index-map 'lbl))]
-                     [((~datum label) lbl) (loop (+ pc 1))]
-                     [(print-registers)
-                      (display-registers registers-map)
-                      (loop (+ pc 1))]
-                     [_ 
-                      (displayln "Unknown instruction")
-                      (loop (+ pc 1))]))))
-
+           (loop go ([pc 0])
+                 
+                 (when (< pc (length instr-list))
+                   (let* ([inst `(list-ref instr-list pc)])
+                     #`(syntax-parse inst
+                         [((~datum cmp) reg1 reg2)
+                          (let* ([val1 (register-get registers-map 'reg1)]
+                                 [val2 (register-get registers-map 'reg2)])
+                            (compare val1 val2)
+                            (go (add1 pc))
+                            (displayln "CHUT"))
+                          ]
+                         [((~datum jne) lbl)
+                          (let* ([lbl-index (hash-ref label-index-map 'lbl)])
+                            (if compare-flag
+                                (go (add1 pc))
+                                (go lbl-index))
+                            (displayln "CHUT"))]
+                         [((~datum mov) reg val)
+                          (begin
+                            (register-set! registers-map 'reg val)
+                            (go (add1 pc))
+                            (displayln "CHUT"))]
+                         [((~datum jmp) lbl)
+                          (let* ([lbl-index (hash-ref label-index-map 'lbl)])
+                            (go lbl-index)
+                            (displayln "CHUT"))]
+                         [((~datum label) lbl) (go (add1 pc))]
+                         [(print-registers)
+                          (begin
+                            (display-registers registers-map)
+                            (go (add1 pc))
+                            (displayln "CHUT"))]
+                         [_ 
+                          (displayln "Unknown instruction")
+                          (go (add1 pc))]))))
            (void)))]))
 
 
