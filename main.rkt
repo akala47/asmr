@@ -1,8 +1,6 @@
 #lang racket
 
-(require syntax-spec-v3
-         loop
-         (for-syntax syntax/parse racket/list))
+(require syntax-spec-v3 (for-syntax syntax/parse racket/list))
 
 (syntax-spec
  (binding-class register)
