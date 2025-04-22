@@ -6,3 +6,8 @@ rough.rkt
 #main.rkt#2#
 Untitled.rkt
 compiled/
+scribblings/*.html
+scribblings/*.pdf
+scribblings/*.js
+scribblings/*.scrbl~
+

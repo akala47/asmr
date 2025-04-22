@@ -3,18 +3,9 @@
 (define name "asmr")
 
 
-
 (define deps '("base"
-
-               "racket/list"
-               
                "syntax-spec-v3"
-
                "rackunit-lib"
-
-               "syntax/parse"
-               
-               "for-syntax"
                ))
 
 (define license 'MIT)
