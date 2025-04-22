@@ -59,7 +59,7 @@ The DSL performs compile-time checks for:
 ### Core BNF Grammar
 
 ```racket
-<program> ::= (asm-block" <registers> <instruction-list>)
+<program> ::= (asm-block <registers> <instruction-list>)
 
 <registers> ::= (registers [(<register-pair>) ...])
 <register-pair> ::= (<register-name> <arith-expr>)
@@ -106,8 +106,8 @@ The DSL performs compile-time checks for:
 Implementation Details
 For developers interested in the implementation details of ASMR, please refer to our Developer Documentation located in `private/README.md`.
 
-
 ## Limitations
+
 - Currently only supports integer arithmetic
 - No support for memory operations beyond registers
 - Complete set of instructions are not yet supported
@@ -117,8 +117,10 @@ It shall continue to evolve along the course of this class according to feedback
 given by our peers and professors.
 
 ### Contributors
+
 Aryan Kalaskar, [Rishikesh Kanabar](https://kanabar.dev/)
 
 ## License
+
 This project is licensed under the MIT License - see the LICENSE file for details.
 This design document reflects the current specifications as of April 21, 2025. It will continue to evolve based on feedback from peers and professors.
