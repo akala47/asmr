@@ -6,7 +6,7 @@
 
 (define deps '("base"
 
-               "list"
+               "racket/list"
                
                "syntax-spec-v3"
 
