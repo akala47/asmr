@@ -12,7 +12,7 @@
 
                "rackunit-lib"
 
-               "syntax-parse"
+               "syntax/parse"
                
                "for-syntax"
                ))
