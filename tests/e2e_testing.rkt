@@ -1,5 +1,7 @@
+#lang racket
+
 (module+ test
-  (require rackunit "main.rkt")
+  (require rackunit "../main.rkt")
 
   ;; Captures and returns all output printed to the current output port
   (define (capture-output thunk)
