@@ -103,11 +103,22 @@ The DSL performs compile-time checks for:
    (label exit)])
 ```
 
+Implementation Details
+For developers interested in the implementation details of ASMR, please refer to our Developer Documentation located in `private/README.md`.
+
+
+## Limitations
+- Currently only supports integer arithmetic
+- No support for memory operations beyond registers
+- Complete set of instructions are not yet supported
+
 This design document reflects the current specification as of April 3, 2025.
 It shall continue to evolve along the course of this class according to feedback
 given by our peers and professors.
 
-Made By:
+### Contributors
+Aryan Kalaskar, [Rishikesh Kanabar](https://kanabar.dev/)
 
-- Aryan Kalaskar
-- Rishikesh Kanabar
+## License
+This project is licensed under the MIT License - see the LICENSE file for details.
+This design document reflects the current specifications as of April 21, 2025. It will continue to evolve based on feedback from peers and professors.

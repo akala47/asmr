@@ -11,4 +11,4 @@ scribblings/*.pdf
 scribblings/*.css
 scribblings/*.js
 scribblings/*.scrbl~
-
+doc/*
