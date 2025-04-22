@@ -14,7 +14,8 @@
 
                "syntax-parse"
                
-               "for-syntax"))
+               "for-syntax"
+               ))
 
 (define license 'MIT)
 
