@@ -59,33 +59,31 @@ The DSL performs compile-time checks for:
 ### Core BNF Grammar
 
 ```racket
-<program> ::= "asm-block" <registers> <instruction-list>
+<program> ::= (asm-block" <registers> <instruction-list>)
 
-<registers> ::= "registers" "(" <register-pair>* ")"
-<register-pair> ::= "(" <register-name> <arith-expr> ")"
+<registers> ::= (registers [(<register-pair>) ...])
+<register-pair> ::= (<register-name> <arith-expr>)
 
-<instruction-list> ::= "[" <instruction>* "]"
+<instruction-list> ::= [<instruction> ...]
 
 <instruction> ::= <label>
-                | "print-registers"
-                | "cmp" <register-name> <register-name>
-                | "cmp" <register-name> <arith-expr>
-                | "je" <label-name>
-                | "jne" <label-name>
-                | "mov" <register-name> <register-name>
-                | "mov" <register-name> <arith-expr>
-                | "add" <register-name> <register-name>
-                | "add" <register-name> <arith-expr>
-                | "sub" <register-name> <register-name>
-                | "sub" <register-name> <arith-expr>
-                | "imul" <register-name> <register-name>
-                | "imul" <register-name> <arith-expr>
-                | "jmp" <label-name>
+                | (print-registers)
+                | (cmp <register-name> <register-name>)
+                | (cmp <register-name> <arith-expr>)
+                | (je <label-name>)
+                | (jne <label-name>)
+                | (mov <register-name> <register-name>)
+                | (mov <register-name> <arith-expr>)
+                | (add <register-name> <register-name>)
+                | (add <register-name> <arith-expr>)
+                | (sub <register-name> <register-name>)
+                | (sub <register-name> <arith-expr>)
+                | (imul <register-name> <register-name>)
+                | (imul <register-name> <arith-expr>)
+                | (jmp <label-name>)
 
-<label> ::= "label" <label-name>
-
+<label> ::= <label-name>
 <arith-expr> ::= <number>
-
 <register-name> ::= IDENTIFIER
 <label-name> ::= IDENTIFIER
 <number> ::= INTEGER
